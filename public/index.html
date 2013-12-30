@@ -1,0 +1,67 @@
+<!doctype html>
+<html ng-app="app">
+  <head>
+    <title>x-offline-template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="stylesheet" href="animations.css" type="text/css" media="screen" title="no title" charset="utf-8">
+    <link rel="stylesheet" href="angular-growl.css" type="text/css" media="screen" title="no title" charset="utf-8">
+    
+    <style>
+      body {
+        padding-top: 35px;
+      }
+    </style>
+  </head>
+  <body>
+    <div growl></div>
+    <header class="navbar navbar-fixed-top navbar-inverse">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">
+          <span class="glyphicon glyphicon-link"></span>
+          Offline First Template
+        </a>
+      </div>
+      <button class="navbar-btn btn btn-warning pull-right" ng-click="logout()" ng-show="authorized">LogOut</button>
+    </header>
+    <div class="jumbotron" ng-hide="authorized">
+      <div class="container">
+        <h1>Offline First Applications</h1>
+        <p><strong>B</strong>ootstrap - <strong>A</strong>ngular - <strong>C</strong>ouchDb/PouchDb - <strong>N</strong>odeJS</p>
+        <button class="btn btn-primary btn-lg" ng-click="login()">Login</button>
+      </div>
+    </div>
+    <div class="view-animate-container" ng-show="authorized" ng-cloak>
+      <div style="padding: 0 15px; margin: 0 -15px;">
+        <div class="col-md-4 list-group hidden-sm hidden-xs">
+          <div class="list-group-item" style="z-index: 2;color: #fff;background-color: #666;border-color: #E6E6E6;" href="#">    
+            <h2>Menu</h2>
+          </div>
+          <a class="list-group-item" style="z-index: 2;color: #fff;background-color: #B3B3B3;border-color: #E6E6E6;" href="/menu1">    
+            <h3>
+              <span class="glyphicon glyphicon-dashboard"></span>
+              Menu 1
+            </h3>
+          </a>
+          <a class="list-group-item" style="z-index: 2;color: #fff;background-color: #B3B3B3;border-color: #E6E6E6;" href="/menu2">    
+            <h3>
+              <span class="glyphicon glyphicon-list"></span>
+              Menu 2
+            </h3>
+          </a>
+          <a class="list-group-item" style="z-index: 2;color: #fff;background-color: #B3B3B3;border-color: #E6E6E6;" href="/menu3">    
+            <h3>
+              <span class="glyphicon glyphicon-tower"></span>
+              Menu 3
+            </h3>
+          </a>
+        </div>
+        <div class="col-md-8">
+          <ng-view class="view-animate"></ng-view> 
+        </div>
+      </div>
+    </div>
+    <script src="//login.persona.org/include.js" type="text/javascript"></script>
+    <script src="/bundle.js"></script>
+  </body>
+</html>
