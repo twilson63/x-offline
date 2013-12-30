@@ -28,4 +28,8 @@ app.get("/*", function(req, res) {
   res.sendfile(__dirname + '/public/index.html');
 });
 
-app.listen(3000);
+if (!module.parent) {
+  app.listen(3000);
+}
+
+module.exports = app;

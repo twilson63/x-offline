@@ -11062,7 +11062,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 }());
 
 /**
- * @license AngularJS v1.2.6
+ * @license AngularJS v1.2.7-build.2029+sha.80e7a45
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -11131,7 +11131,7 @@ function minErr(module) {
       return match;
     });
 
-    message = message + '\nhttp://errors.angularjs.org/1.2.6/' +
+    message = message + '\nhttp://errors.angularjs.org/1.2.7-build.2029+sha.80e7a45/' +
       (module ? module + '/' : '') + code;
     for (i = 2; i < arguments.length; i++) {
       message = message + (i == 2 ? '?' : '&') + 'p' + (i-2) + '=' +
@@ -12894,11 +12894,11 @@ function setupModuleLoader(window) {
  * - `codeName` – `{string}` – Code name of the release, such as "jiggling-armfat".
  */
 var version = {
-  full: '1.2.6',    // all of these placeholder strings will be replaced by grunt's
+  full: '1.2.7-build.2029+sha.80e7a45',    // all of these placeholder strings will be replaced by grunt's
   major: 1,    // package task
   minor: 2,
-  dot: 6,
-  codeName: 'taco-salsafication'
+  dot: 7,
+  codeName: 'emoji-clairvoyance'
 };
 
 
@@ -18112,7 +18112,7 @@ function $HttpProvider() {
      * will result in the success callback being called. Note that if the response is a redirect,
      * XMLHttpRequest will transparently follow it, meaning that the error callback will not be
      * called for such responses.
-     * 
+     *
      * # Calling $http from outside AngularJS
      * The `$http` service will not actually send the request until the next `$digest()` is
      * executed. Normally this is not an issue, since almost all the time your call to `$http` will
@@ -18299,19 +18299,20 @@ function $HttpProvider() {
      *           return responseOrNewPromise
      *         }
      *         return $q.reject(rejection);
-     *       };
-     *     }
+     *       }
+     *     };
      *   });
      *
      *   $httpProvider.interceptors.push('myHttpInterceptor');
      *
      *
-     *   // register the interceptor via an anonymous factory
+     *   // alternatively, register the interceptor via an anonymous factory
      *   $httpProvider.interceptors.push(function($q, dependency1, dependency2) {
      *     return {
      *      'request': function(config) {
      *          // same as above
      *       },
+     *
      *       'response': function(response) {
      *          // same as above
      *       }
@@ -22362,6 +22363,7 @@ function $RootScopeProvider(){
       this.$$asyncQueue = [];
       this.$$postDigestQueue = [];
       this.$$listeners = {};
+      this.$$listenerCount = {};
       this.$$isolateBindings = {};
     }
 
@@ -22421,6 +22423,7 @@ function $RootScopeProvider(){
         }
         child['this'] = child;
         child.$$listeners = {};
+        child.$$listenerCount = {};
         child.$parent = this;
         child.$$watchers = child.$$nextSibling = child.$$childHead = child.$$childTail = null;
         child.$$prevSibling = this.$$childTail;
@@ -22925,6 +22928,8 @@ function $RootScopeProvider(){
         this.$$destroyed = true;
         if (this === $rootScope) return;
 
+        forEach(this.$$listenerCount, bind(null, decrementListenerCount, this));
+
         if (parent.$$childHead == this) parent.$$childHead = this.$$nextSibling;
         if (parent.$$childTail == this) parent.$$childTail = this.$$prevSibling;
         if (this.$$prevSibling) this.$$prevSibling.$$nextSibling = this.$$nextSibling;
@@ -23114,8 +23119,18 @@ function $RootScopeProvider(){
         }
         namedListeners.push(listener);
 
+        var current = this;
+        do {
+          if (!current.$$listenerCount[name]) {
+            current.$$listenerCount[name] = 0;
+          }
+          current.$$listenerCount[name]++;
+        } while ((current = current.$parent));
+
+        var self = this;
         return function() {
           namedListeners[indexOf(namedListeners, listener)] = null;
+          decrementListenerCount(self, 1, name);
         };
       },
 
@@ -23227,8 +23242,7 @@ function $RootScopeProvider(){
             listeners, i, length;
 
         //down while you can, then up and next sibling or up and next sibling until back at root
-        do {
-          current = next;
+        while ((current = next)) {
           event.currentScope = current;
           listeners = current.$$listeners[name] || [];
           for (i=0, length = listeners.length; i<length; i++) {
@@ -23250,12 +23264,14 @@ function $RootScopeProvider(){
           // Insanity Warning: scope depth-first traversal
           // yes, this code is a bit crazy, but it works and we have tests to prove it!
           // this piece should be kept in sync with the traversal in $digest
-          if (!(next = (current.$$childHead || (current !== target && current.$$nextSibling)))) {
+          // (though it differs due to having the extra check for $$listenerCount)
+          if (!(next = ((current.$$listenerCount[name] && current.$$childHead) ||
+              (current !== target && current.$$nextSibling)))) {
             while(current !== target && !(next = current.$$nextSibling)) {
               current = current.$parent;
             }
           }
-        } while ((current = next));
+        }
 
         return event;
       }
@@ -23282,6 +23298,16 @@ function $RootScopeProvider(){
       var fn = $parse(exp);
       assertArgFn(fn, name);
       return fn;
+    }
+
+    function decrementListenerCount(current, count, name) {
+      do {
+        current.$$listenerCount[name] -= count;
+
+        if (current.$$listenerCount[name] === 0) {
+          delete current.$$listenerCount[name];
+        }
+      } while ((current = current.$parent));
     }
 
     /**
@@ -31601,7 +31627,7 @@ var styleDirective = valueFn({
 
 !angular.$$csp() && angular.element(document).find('head').prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide{display:none !important;}ng\\:form{display:block;}</style>');
 /**
- * @license AngularJS v1.2.6
+ * @license AngularJS v1.2.7-build.2029+sha.80e7a45
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -32444,7 +32470,7 @@ function ngViewFactory(   $route,   $anchorScroll,   $animate) {
           var locals = $route.current && $route.current.locals,
               template = locals && locals.$template;
 
-          if (template) {
+          if (angular.isDefined(template)) {
             var newScope = scope.$new();
             var current = $route.current;
 
@@ -32513,7 +32539,7 @@ function ngViewFillContentFactory($compile, $controller, $route) {
 })(window, window.angular);
 
 /**
- * @license AngularJS v1.2.6
+ * @license AngularJS v1.2.7-build.2029+sha.80e7a45
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -33889,7 +33915,7 @@ angular.module('ngAnimate', ['ng'])
 })(window, window.angular);
 
 /**
- * @license AngularJS v1.2.6
+ * @license AngularJS v1.2.7-build.2029+sha.80e7a45
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -34453,7 +34479,7 @@ makeSwipeDirective('ngSwipeRight', 1, 'swiperight');
 })(window, window.angular);
 
 /**
- * @license AngularJS v1.2.6
+ * @license AngularJS v1.2.7-build.2029+sha.80e7a45
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -34665,7 +34691,7 @@ var validAttrs = angular.extend({}, uriAttrs, makeMap(
     'abbr,align,alt,axis,bgcolor,border,cellpadding,cellspacing,class,clear,'+
     'color,cols,colspan,compact,coords,dir,face,headers,height,hreflang,hspace,'+
     'ismap,lang,language,nohref,nowrap,rel,rev,rows,rowspan,rules,'+
-    'scope,scrolling,shape,span,start,summary,target,title,type,'+
+    'scope,scrolling,shape,size,span,start,summary,target,title,type,'+
     'valign,value,vspace,width'));
 
 function makeMap(str) {
@@ -41044,6 +41070,7 @@ angular.module('app', ['ngRoute', 'ngTouch', 'ngAnimate', 'angular-growl'])
       $locationProvider.html5Mode(true);
       growlProvider.globalTimeToLive(3000);
   })
+  .constant('dbName', 'foobar')
   .run(function($rootScope, growl, auth) {
     $rootScope.authorized = false;
     var loadSession = function(err, user) {
@@ -41096,8 +41123,21 @@ angular.module('app')
     };
   });
 
+angular.module('app')
+  .factory('db', function(dbUrl, dbName) {
+
+    var db =  new PouchDB(dbName);
+    function syncError(data) {
+      console.log(data);
+    }
+
+    var opts = {continuous: true, complete: syncError};
+    db.replicate.from(dbUrl, opts);
+    db.replicate.to(dbUrl, opts);
+    return db;  
+  });
 
 angular.module('app')
   .controller('HomeCtrl', function($scope) {
-    
+    $scope.subject = 'Hello World';
   });
