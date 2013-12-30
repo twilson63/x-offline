@@ -12,5 +12,5 @@ describe("server", function() {
     req(app)
       .get('/db')
       .expect(401, done);
-  })
+  });
 });
