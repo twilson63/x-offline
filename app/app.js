@@ -9,6 +9,7 @@ angular.module('app', ['ngRoute', 'ngTouch', 'ngAnimate', 'angular-growl'])
       $locationProvider.html5Mode(true);
       growlProvider.globalTimeToLive(3000);
   })
+  .constant('dbName', 'foobar')
   .run(function($rootScope, growl, auth) {
     $rootScope.authorized = false;
     var loadSession = function(err, user) {
